@@ -1,7 +1,9 @@
 package guru.springfamework.controller.v1;
 
 import guru.springfamework.api.v1.model.CustomerDTO;
+import guru.springfamework.controller.RestResponseEntityExceptionHandler;
 import guru.springfamework.services.CustomerService;
+import guru.springfamework.services.ResourceNotFoundException;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -9,7 +11,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.Arrays;
@@ -41,7 +42,7 @@ public class CustomerControllerTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        mockMvc = MockMvcBuilders.standaloneSetup(customerController).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(customerController).setControllerAdvice(new RestResponseEntityExceptionHandler()).build();
     }
 
     @Test
@@ -127,7 +128,7 @@ public class CustomerControllerTest {
     }
 
     @Test
-    public void testUpdateCustomer() throws  Exception{
+    public void testUpdateCustomer() throws Exception {
         //given
         CustomerDTO customerDTO = new CustomerDTO();
         customerDTO.setFirstname("Fred");
@@ -142,8 +143,8 @@ public class CustomerControllerTest {
 
         //when/then
         mockMvc.perform(put("/api/v1/customers/1")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(asJsonString(customerDTO)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(asJsonString(customerDTO)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.firstname", equalTo("Fred")))
                 .andExpect(jsonPath("$.lastname", equalTo("Flintstone")))
@@ -152,4 +153,40 @@ public class CustomerControllerTest {
     }
 
 
+    @Test
+    public void testPatchCustomer() throws Exception {
+        //given
+        CustomerDTO customer = new CustomerDTO();
+        customer.setFirstname("Fred");
+
+        CustomerDTO returnDto = new CustomerDTO();
+        returnDto.setFirstname(customer.getFirstname());
+        returnDto.setLastname("Flintstone");
+        returnDto.setCustomerUrl("/api/v1/customers/1");
+
+        when(this.customerService.patchCustomer(anyLong(), any(CustomerDTO.class))).thenReturn(returnDto);
+
+        mockMvc.perform(patch("/api/v1/customers/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(asJsonString(customer)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.firstname", equalTo("Fred")))
+                .andExpect(jsonPath("$.lastname", equalTo("Flintstone")))
+                .andExpect(jsonPath("$.customer_url", equalTo("/api/v1/customers/1")));
+    }
+
+    @Test
+    public void testGetByIdNotFound() throws  Exception{
+        when(this.customerService.getCustomerById(anyLong())).thenThrow(ResourceNotFoundException.class);
+
+        mockMvc.perform(get(CustomerController.BASE_URL+"/1").contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+    @Test
+    public void testDeleteCustomer() throws Exception {
+        mockMvc.perform(delete("/api/v1/customers/1")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+    }
 }

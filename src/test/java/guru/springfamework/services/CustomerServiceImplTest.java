@@ -2,6 +2,7 @@ package guru.springfamework.services;
 
 import guru.springfamework.api.v1.mapper.CustomerMapper;
 import guru.springfamework.api.v1.model.CustomerDTO;
+import guru.springfamework.controller.v1.CustomerController;
 import guru.springfamework.domain.Customer;
 import guru.springfamework.repositories.CustomerRepository;
 import org.junit.Before;
@@ -15,7 +16,7 @@ import java.util.Optional;
 
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class CustomerServiceImplTest {
 
@@ -107,7 +108,7 @@ public class CustomerServiceImplTest {
 
         //then
         assertEquals(customerDTO.getFirstname(), saveDto.getFirstname());
-        assertEquals("/api/v1/customer/1",  saveDto.getCustomerUrl());
+        assertEquals(CustomerController.BASE_URL + "/1",  saveDto.getCustomerUrl());
 
     }
 
@@ -129,9 +130,14 @@ public class CustomerServiceImplTest {
 
         //then
         assertEquals(customerDTO.getFirstname(), savedDto.getFirstname());
-        assertEquals("/api/v1/customer/1", savedDto.getCustomerUrl());
-
-
+        assertEquals(CustomerController.BASE_URL+"/1", savedDto.getCustomerUrl());
     }
 
+    @Test
+    public void deleteCustomerById() throws Exception{
+        Long id =1L;
+        customerRepository.deleteById(id);
+
+        verify(customerRepository, times(1)).deleteById(anyLong());
+    }
 }
