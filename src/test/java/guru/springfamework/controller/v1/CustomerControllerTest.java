@@ -56,7 +56,8 @@ public class CustomerControllerTest {
 
         //when
         mockMvc.perform(get("/api/v1/customers/")
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.customers", hasSize(2)));
     }
@@ -70,7 +71,8 @@ public class CustomerControllerTest {
 
         //when
         mockMvc.perform(get("/api/v1/customers/2")
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", equalTo(2)));
     }
@@ -84,7 +86,8 @@ public class CustomerControllerTest {
 
         //when
         mockMvc.perform(get("/api/v1/customers/firstname/" + FIRSTNAME)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.firstname", equalTo(FIRSTNAME)));
     }
@@ -99,7 +102,8 @@ public class CustomerControllerTest {
 
         //when
         mockMvc.perform(get("/api/v1/customers/lastname/" + LASTNAME)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.lastname", equalTo(LASTNAME)));
     }
@@ -120,6 +124,7 @@ public class CustomerControllerTest {
 
         mockMvc.perform(post("/api/v1/customers")
                 .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
                 .content(asJsonString(customer)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.firstname", equalTo("Fred")))
@@ -144,6 +149,7 @@ public class CustomerControllerTest {
         //when/then
         mockMvc.perform(put("/api/v1/customers/1")
                 .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
                 .content(asJsonString(customerDTO)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.firstname", equalTo("Fred")))
@@ -168,6 +174,7 @@ public class CustomerControllerTest {
 
         mockMvc.perform(patch("/api/v1/customers/1")
                 .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
                 .content(asJsonString(customer)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.firstname", equalTo("Fred")))
@@ -176,12 +183,13 @@ public class CustomerControllerTest {
     }
 
     @Test
-    public void testGetByIdNotFound() throws  Exception{
+    public void testGetByIdNotFound() throws Exception {
         when(this.customerService.getCustomerById(anyLong())).thenThrow(ResourceNotFoundException.class);
 
-        mockMvc.perform(get(CustomerController.BASE_URL+"/1").contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get(CustomerController.BASE_URL + "/1").contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
     }
+
     @Test
     public void testDeleteCustomer() throws Exception {
         mockMvc.perform(delete("/api/v1/customers/1")
